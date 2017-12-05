@@ -36,6 +36,9 @@ int shRotPot = 4;
 //-------------------------------------------------------------------------------
 // Defines
 //-------------------------------------------------------------------------------
+// PWM for ENABLE WRITE
+#define PWM_ENABLE_ON 100
+#define PWM_ENABLE_OFF 0
 
 // Pot value limits
 #define GRIPPER_OPEN 460
@@ -107,7 +110,7 @@ void setup() {
 // Runs control program
 //-------------------------------------------------------------------------------
 void loop() {
-
+  
   // Start from "home" position
   Home();
   delay(2000);
@@ -145,17 +148,17 @@ void Gripper(int t){
   while(analogRead(gripperPot) > (t + GRIPPER_TOL) || analogRead(gripperPot) < (t - GRIPPER_TOL)){
     if(analogRead(gripperPot) > (t + GRIPPER_TOL)){
       digitalWrite(gripper, HIGH);
-      digitalWrite(enGripper, HIGH);
+      analogWrite(enGripper, PWM_ENABLE_ON);
       while(analogRead(gripperPot) > (t + GRIPPER_TOL)){}
-      digitalWrite(enGripper, LOW);
+      analogWrite(enGripper, PWM_ENABLE_OFF);
       delay(700);
     }
     
     if(analogRead(gripperPot) < (t - GRIPPER_TOL)){
       digitalWrite(gripper, LOW);
-      digitalWrite(enGripper, HIGH);
+      analogWrite(enGripper, PWM_ENABLE_ON);
       while(analogRead(gripperPot) < (t - GRIPPER_TOL)){}
-      digitalWrite(enGripper, LOW);
+      analogWrite(enGripper, PWM_ENABLE_OFF);
       delay(700);
     }
   }
@@ -171,17 +174,17 @@ void Wrist(int t){
   while(analogRead(wristPot) < (t - WRIST_TOL) || analogRead(wristPot) > (t + WRIST_TOL)){
     if(analogRead(wristPot) < (t - WRIST_TOL)){
       digitalWrite(wrist, HIGH);
-      digitalWrite(enWrist, HIGH);
+      analogWrite(enWrist, PWM_ENABLE_ON);
       while(analogRead(wristPot) < (t - WRIST_TOL)){}
-      digitalWrite(enWrist, LOW);
+      analogWrite(enWrist, PWM_ENABLE_OFF);
       delay(700);
     }
     
     if(analogRead(wristPot) > (t + WRIST_TOL)){
       digitalWrite(wrist, LOW);
-      digitalWrite(enWrist, HIGH);
+      analogWrite(enWrist, PWM_ENABLE_ON);
       while(analogRead(wristPot) > (t + WRIST_TOL)){}
-      digitalWrite(enWrist, LOW);
+      analogWrite(enWrist, PWM_ENABLE_OFF);
       delay(700);
     }
   }  
@@ -197,17 +200,17 @@ void Elbow(int t){
   while(analogRead(elbowPot) < (t - ELBOW_TOL) || analogRead(elbowPot) > (t + ELBOW_TOL)){
     if(analogRead(elbowPot) < (t - ELBOW_TOL)){
       digitalWrite(elbow, HIGH);
-      digitalWrite(enElbow, HIGH);
+      analogWrite(enElbow, PWM_ENABLE_ON);
       while(analogRead(elbowPot) < (t - ELBOW_TOL)){}
-      digitalWrite(enElbow, LOW);
+      analogWrite(enElbow, PWM_ENABLE_OFF);
       delay(700);
     }
 
     if(analogRead(elbowPot) > (t + ELBOW_TOL)){
       digitalWrite(elbow, LOW);
-      digitalWrite(enElbow, HIGH);
+      analogWrite(enElbow, PWM_ENABLE_ON);
       while(analogRead(elbowPot) > (t + ELBOW_TOL)){}
-      digitalWrite(enElbow, LOW);
+      analogWrite(enElbow, PWM_ENABLE_OFF);
       delay(700);
     }
   }
@@ -223,17 +226,17 @@ void ShoulderLift(int t){
   while(analogRead(shLiftPot) > (t + SH_LIFT_TOL) || analogRead(shLiftPot) < (t - SH_LIFT_TOL)){
     if(analogRead(shLiftPot) > (t + SH_LIFT_TOL)){
       digitalWrite(shoulderLift, HIGH);
-      digitalWrite(enShoulderLift, HIGH);
+      analogWrite(enShoulderLift, PWM_ENABLE_ON);
       while(analogRead(shLiftPot) > (t + SH_LIFT_TOL)){}
-      digitalWrite(enShoulderLift, LOW);
+      analogWrite(enShoulderLift, PWM_ENABLE_OFF);
       delay(700);
     }
 
     if(analogRead(shLiftPot) < (t - SH_LIFT_TOL)){
       digitalWrite(shoulderLift, LOW);
-      digitalWrite(enShoulderLift, HIGH);
+      analogWrite(enShoulderLift, PWM_ENABLE_ON);
       while(analogRead(shLiftPot) < (t - SH_LIFT_TOL)){}
-      digitalWrite(enShoulderLift, LOW);
+      analogWrite(enShoulderLift, PWM_ENABLE_OFF);
       delay(700);
     }
   }
@@ -249,17 +252,17 @@ void ShoulderRot(int t){
   while(analogRead(shRotPot) < (t - SH_ROT_TOL) || analogRead(shRotPot) > (t + SH_ROT_TOL)){
     if(analogRead(shRotPot) < (t - SH_ROT_TOL)){
       digitalWrite(shoulderRot, HIGH);
-      digitalWrite(enShoulderRot, HIGH);
+      analogWrite(enShoulderRot, PWM_ENABLE_ON);
       while(analogRead(shRotPot) < (t - SH_ROT_TOL)){}
-      digitalWrite(enShoulderRot, LOW);
+      analogWrite(enShoulderRot, PWM_ENABLE_OFF);
       delay(700);
     }
 
     if(analogRead(shRotPot) > (t + SH_ROT_TOL)){
       digitalWrite(shoulderRot, LOW);
-      digitalWrite(enShoulderRot, HIGH);
+      analogWrite(enShoulderRot, PWM_ENABLE_ON);
       while(analogRead(shRotPot) > (t + SH_ROT_TOL)){}
-      digitalWrite(enShoulderRot, LOW);
+      analogWrite(enShoulderRot, PWM_ENABLE_OFF);
       delay(700);
     }
   }
@@ -300,11 +303,11 @@ void Home(void){
 // Sets all digital output pins to LOW
 //-------------------------------------------------------------------------------
 void clearOuts(){
-  digitalWrite(enShoulderLift, LOW);
-  digitalWrite(enElbow, LOW);
-  digitalWrite(enWrist, LOW);
-  digitalWrite(enGripper, LOW);
-  digitalWrite(enShoulderRot, LOW);
+  analogWrite(enShoulderLift, PWM_ENABLE_OFF);
+  analogWrite(enElbow, PWM_ENABLE_OFF);
+  analogWrite(enWrist, PWM_ENABLE_OFF);
+  analogWrite(enGripper, PWM_ENABLE_OFF);
+  analogWrite(enShoulderRot, PWM_ENABLE_OFF);
   digitalWrite(shoulderLift, LOW);
   digitalWrite(elbow, LOW);
   digitalWrite(wrist, LOW);
