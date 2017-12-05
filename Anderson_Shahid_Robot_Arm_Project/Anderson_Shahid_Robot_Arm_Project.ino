@@ -124,7 +124,7 @@ void loop() {
   ShoulderRot(SHOULDER_ROT_HOME);
   ShoulderLift(analogRead(shLiftPot) - 70);
   Elbow(analogRead(elbowPot) - 50);
-//  ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 4));
+  //  ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 4));
   Wrist(WRIST_DOWN);
   Gripper(GRIPPER_OPEN);
 
