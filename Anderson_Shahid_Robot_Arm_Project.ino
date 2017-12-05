@@ -16,20 +16,22 @@ int enWrist = 9;         //Enable wrist motor
 int enElbow = 10;        //Enable elbow motor
 int enShoulderLift = 11; //Enable shoulder lift motor
 int enShoulderRot = 12;  //Enable shoulder rotation motor
+int enLight =13; 
   
 // Motor control pins
-int gripper = 3;        //Gripper close Pin
-int wrist = 4;          //Wrist up pin
-int elbow = 5;          //Elbow up pin
-int shoulderLift = 6;   //Shoulder down pin
-int shoulderRot = 7;    //Shoulder right pin
+int gripper = 2;        //Gripper close Pin
+int wrist = 3;          //Wrist up pin
+int elbow = 4;          //Elbow up pin
+int shoulderLift = 5;   //Shoulder down pin
+int shoulderRot = 6;    //Shoulder right pin
+int light = 7;
 
 // Potentiometer analog input pins
-int gripperPot = 4;
-int wristPot = 3;
+int gripperPot = 0;
+int wristPot = 1;
 int elbowPot = 2;
-int shLiftPot = 1;
-int shRotPot = 0;
+int shLiftPot = 3;
+int shRotPot = 4;
 
 //-------------------------------------------------------------------------------
 // Defines
