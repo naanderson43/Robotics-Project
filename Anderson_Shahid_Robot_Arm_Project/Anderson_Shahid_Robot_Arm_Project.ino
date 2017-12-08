@@ -4,8 +4,6 @@
  *  Authors: Nick Anderson & Sikender Shahid
  *  Course Instructor: Dr. Aaron Becker
  */
-
-
 //-------------------------------------------------------------------------------
 // Globals
 //-------------------------------------------------------------------------------
@@ -37,7 +35,7 @@ int shRotPot = 4;
 // Defines
 //-------------------------------------------------------------------------------
 // PWM for ENABLE WRITE
-#define PWM_ENABLE_ON 100
+int PWM_ENABLE_ON = 100;
 #define PWM_ENABLE_OFF 0
 
 // Pot value limits
@@ -66,7 +64,6 @@ int shRotPot = 4;
 #define SH_LIFT_TOL 20
 #define SH_ROT_TOL 5
 
-
 //-------------------------------------------------------------------------------
 // Prototypes
 //-------------------------------------------------------------------------------
@@ -77,6 +74,46 @@ void ShoulderLift(int t);
 void ShoulderRot(int t);
 void Rest(void);
 void Home(void);
+void StopMotor(); 
+
+
+/*
+turning arm pressure down 
+picking up the base
+rotating the base <Camera>
+*/
+
+/*
+moving forward
+*/
+
+/*
+moving backward
+*/
+
+
+void Motor(int motor, int enable, int speed, int direction){
+  digitalWrite(motor, direction); 
+  analogWrite(enable, speed); 
+}
+
+void MotorControl(int motor, int enable, int speed, int pot, int position, int tolerance){
+    while(analogRead(pot) < (position - tolerance) || analogRead(pot) > (position + tolerance)){
+    if(analogRead(pot) < (position - tolerance)){
+      Motor(motor, enable, speed, HIGH); 
+      while(analogRead(pot) < (position - tolerance)){}
+      analogWrite(enable, 0);
+      delay(700);
+    }
+
+    if(analogRead(motor) > (position + tolerance)){
+      Motor(motor, enable, speed, LOW); 
+      while(analogRead(pot) > (position + tolerance)){}
+      analogWrite(enable, 0);
+      delay(700);
+    }
+  }
+}
 
 
 //-------------------------------------------------------------------------------
@@ -85,7 +122,6 @@ void Home(void);
 // Configures digital pins and clears outputs
 //-------------------------------------------------------------------------------
 void setup() {
-
   // Set enable pins as outputs
   pinMode(enShoulderLift, OUTPUT);
   pinMode(enElbow, OUTPUT);
@@ -101,7 +137,7 @@ void setup() {
   pinMode(shoulderRot, OUTPUT);
 
   // Set all outputs low
-  clearOuts();
+  StopMotor();
 }
 
 //-------------------------------------------------------------------------------
@@ -110,29 +146,73 @@ void setup() {
 // Runs control program
 //-------------------------------------------------------------------------------
 void loop() {
+ while(1){ 
+  //init state
+  ShoulderLift(551);
+  Gripper(595); 
+  Wrist(549); 
+  Elbow(219); 
+  
+  delay(500); 
+  
+  //place state 
+  Gripper(594); 
+  Wrist(557); 
+  Elbow(218); 
+  ShoulderLift(600);
+  delay(500); 
+  
+  //pull state 
+  Wrist(86);
+
+  delay(500);  
+}
+  
+  
+  while(1); 
+ //Working pick up 
+  Elbow(ELBOW_UP - ((ELBOW_UP - ELBOW_DOWN) / 2)); 
+  ShoulderRot((SHOULDER_LEFT+SHOULDER_RIGHT)/2);  
+  while(0); 
+  Gripper(593); 
+  Wrist(366); 
+  Elbow(245);
+  ShoulderLift(635);
+  while(1){
+   ShoulderRot(SHOULDER_LEFT+200); 
+   ShoulderRot(SHOULDER_RIGHT-200); 
+    
+  } 
+
+
+  //MotorControl(int motor, int enable, int speed, int pot, int position, int tolerance)
+  //
+  //Home(); 
+  //Gripper(GRIPPER_CLOSED - ((GRIPPER_CLOSED - GRIPPER_OPEN)/4)); 
+  //ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 6));
   
   // Start from "home" position
-  Home();
-  delay(2000);
+  // Home();
+  // delay(2000);
 
-  // Move to pick up location and pick up object
-  ShoulderRot(((SHOULDER_RIGHT - SHOULDER_LEFT) / 4) + SHOULDER_LEFT);
-  Elbow(ELBOW_UP - ((ELBOW_UP - ELBOW_DOWN) / 2));
-  ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 6));
-  Wrist(WRIST_DOWN);
-  Gripper(GRIPPER_CLOSED - ((GRIPPER_CLOSED - GRIPPER_OPEN) / 4));
-  Wrist(WRIST_UP);
+  // // Move to pick up location and pick up object
+  // ShoulderRot(((SHOULDER_RIGHT - SHOULDER_LEFT) / 4) + SHOULDER_LEFT);
+  // Elbow(ELBOW_UP - ((ELBOW_UP - ELBOW_DOWN) / 2));
+  // ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 6));
+  // Wrist(WRIST_DOWN);
+  // Gripper(GRIPPER_CLOSED - ((GRIPPER_CLOSED - GRIPPER_OPEN) / 4));
+  // Wrist(WRIST_UP);
 
-  // Move to drop-off location and drop off object
-  ShoulderRot(SHOULDER_ROT_HOME);
-  ShoulderLift(analogRead(shLiftPot) - 70);
-  Elbow(analogRead(elbowPot) - 50);
-  //  ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 4));
-  Wrist(WRIST_DOWN);
-  Gripper(GRIPPER_OPEN);
+  // // Move to drop-off location and drop off object
+  // ShoulderRot(SHOULDER_ROT_HOME);
+  // ShoulderLift(analogRead(shLiftPot) - 70);
+  // Elbow(analogRead(elbowPot) - 50);
+  // //  ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 4));
+  // Wrist(WRIST_DOWN);
+  // Gripper(GRIPPER_OPEN);
 
-  // Return to "home" position
-  Home();
+  // // Return to "home" position
+  // Home();
 
   // End program
   while(true){}
@@ -178,7 +258,7 @@ void Wrist(int t){
       while(analogRead(wristPot) < (t - WRIST_TOL)){}
       analogWrite(enWrist, PWM_ENABLE_OFF);
       delay(700);
-    }
+    }  
     
     if(analogRead(wristPot) > (t + WRIST_TOL)){
       digitalWrite(wrist, LOW);
@@ -288,8 +368,6 @@ void Rest(void){
 // Moves robot arm to the "Home" position
 //-------------------------------------------------------------------------------
 void Home(void){
-  
-  
   ShoulderLift(SHOULDER_LIFT_HOME);
   Elbow(ELBOW_HOME);
   Wrist(WRIST_HOME);
@@ -298,11 +376,11 @@ void Home(void){
 }
 
 //-------------------------------------------------------------------------------
-// clearOuts()
+// StopMotor()
 //
 // Sets all digital output pins to LOW
 //-------------------------------------------------------------------------------
-void clearOuts(){
+void StopMotor(){
   analogWrite(enShoulderLift, PWM_ENABLE_OFF);
   analogWrite(enElbow, PWM_ENABLE_OFF);
   analogWrite(enWrist, PWM_ENABLE_OFF);
