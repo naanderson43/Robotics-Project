@@ -149,6 +149,7 @@ void home_setup(void){
 // Configures digital pins and clears outputs
 //-------------------------------------------------------------------------------
 void setup() {
+  MotorSetup(); 
   for(int i = 0 ; i < MOTOR_NUM ; i++){
     pinMode(motors[i]._enable, OUTPUT); 
     pinMode(motors[i]._pin, OUTPUT);  
