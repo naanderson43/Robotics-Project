@@ -24,6 +24,7 @@
 #define GRIPPER_HOME 460
 
 #define MOTOR_NUM 5
+#define DEFAULT_SPEED 100
 
 struct Motor{
   int _pin; 
@@ -85,6 +86,56 @@ void MotorControl(int motor, int speed, int position){
   }
 }
 
+struct motor_state{
+  int position[5];
+  int speed[5]; 
+}
+
+struct motor_state move_forward[3]; 
+void move_forward_setup(){
+  for(int i = 0 ; i < MOTOR_NUM ; i++){
+    move_forward[0].speed[i] = DEFAULT_SPEED; 
+  }
+  // initial state
+  move_forward[0].position[GRIPPER] = 595; 
+  move_forward[0].position[WRIST] = 549; 
+  move_forward[0].position[ELBOW] = 219; 
+  move_forward[0].position[SHOULDER_LIFT] = 551; 
+  move_forward[0].position[SHOULDER_ROT] = (SHOULDER_LEFT+SHOULDER_RIGHT)/2; 
+
+  //place state
+  move_forward[0].position[GRIPPER] = 594; 
+  move_forward[0].position[WRIST] = 557; 
+  move_forward[0].position[ELBOW] = 218; 
+  move_forward[0].position[SHOULDER_LIFT] = 600; 
+ // move_forward[0].position[SHOULDER_ROT] = 0;
+ 
+  //pull state
+  move_forward[0].position[GRIPPER] = 0; 
+  move_forward[0].position[WRIST] = 86; 
+  move_forward[0].position[ELBOW] = 0; 
+  move_forward[0].position[SHOULDER_LIFT] = 0; 
+  move_forward[0].position[SHOULDER_ROT] = 0;
+}
+
+//-------------------------------------------------------------------------------
+// Home()
+//
+// Moves robot arm to the "Home" position
+//-------------------------------------------------------------------------------
+
+struct motor_state home; 
+void home_setup(void){
+  for (int i = 0 ; i < MOTOR_NUM ; i++){
+    home[i].speed[DEFAULT_SPEED]; 
+  }
+  home[GRIPPER].position[GRIPPER_CLOSED]; 
+  home[ELBOW].position[ELBOW_HOME]; 
+  home[WRIST].position[WRIST_HOME];
+  home[SHOULDER_LIFT].position[SHOULDER_LIFT_HOME]; 
+  home[SHOULDER_ROT].position[SHOULDER_ROT_HOME]; 
+}
+
 //-------------------------------------------------------------------------------
 // setup()
 //
@@ -98,125 +149,19 @@ void setup() {
   MotorStop(); 
 }
 
-//-------------------------------------------------------------------------------
-// loop()
-//
-// Runs control program
-//-------------------------------------------------------------------------------
-// struct motor_state{
-//   int *motor; 
-//   int *position;
-// }
-// struct motor_state* move_forward; 
-// void move_forward_setup(){
-//   struct motor_state * move_forward= (struct motor_s*) 3; 
-//   move_forward[0]->motor = (int*)malloc((5)*sizeof(int)); 
-//   move_forward[0]->position = (int*)malloc((5)*sizeof(int)); 
-// }
-
-
 void loop() {
- while(1){ 
-  //init state
-  ShoulderLift(551);
-  Gripper(595); 
-  Wrist(549); 
-  Elbow(219); 
-  
-  delay(500); 
-  
-  //place state 
-  Gripper(594); 
-  Wrist(557); 
-  Elbow(218); 
-  ShoulderLift(600);
-  delay(500); 
-  
-  //pull state 
-  Wrist(86);
-
-  delay(500);  
-}
-  
-  
-  while(1); 
- //Working pick up 
-  Elbow(ELBOW_UP - ((ELBOW_UP - ELBOW_DOWN) / 2)); 
-  ShoulderRot((SHOULDER_LEFT+SHOULDER_RIGHT)/2);  
-  while(0); 
-  Gripper(593); 
-  Wrist(366); 
-  Elbow(245);
-  ShoulderLift(635);
-  while(1){
-   ShoulderRot(SHOULDER_LEFT+200); 
-   ShoulderRot(SHOULDER_RIGHT-200); 
-    
-  } 
-
-
-  //MotorControl(int motor, int enable, int speed, int pot, int position, int tolerance)
-  //
-  //Home(); 
-  //Gripper(GRIPPER_CLOSED - ((GRIPPER_CLOSED - GRIPPER_OPEN)/4)); 
-  //ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 6));
-  
-  // Start from "home" position
-  // Home();
-  // delay(2000);
-
-  // // Move to pick up location and pick up object
-  // ShoulderRot(((SHOULDER_RIGHT - SHOULDER_LEFT) / 4) + SHOULDER_LEFT);
-  // Elbow(ELBOW_UP - ((ELBOW_UP - ELBOW_DOWN) / 2));
-  // ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 6));
-  // Wrist(WRIST_DOWN);
-  // Gripper(GRIPPER_CLOSED - ((GRIPPER_CLOSED - GRIPPER_OPEN) / 4));
-  // Wrist(WRIST_UP);
-
-  // // Move to drop-off location and drop off object
-  // ShoulderRot(SHOULDER_ROT_HOME);
-  // ShoulderLift(analogRead(shLiftPot) - 70);
-  // Elbow(analogRead(elbowPot) - 50);
-  // //  ShoulderLift(SHOULDER_DOWN - ((SHOULDER_DOWN - SHOULDER_UP) / 4));
-  // Wrist(WRIST_DOWN);
-  // Gripper(GRIPPER_OPEN);
-
-  // // Return to "home" position
-  // Home();
-
-  // End program
-  while(true){}
+  while(1);
 }
 //-------------------------------------------------------------------------------
 // Rest()
 //
 // Moves robot arm to the "rest" position
 //-------------------------------------------------------------------------------
-void Rest(void){
-  ShoulderRot(SHOULDER_ROT_HOME);
-  Elbow((ELBOW_DOWN + ELBOW_UP) / 2);
-  ShoulderLift(SHOULDER_UP);
-  Elbow(ELBOW_DOWN);
-  Wrist(WRIST_DOWN);
-  Gripper(GRIPPER_CLOSED);
-}
-
-//-------------------------------------------------------------------------------
-// Home()
-//
-// Moves robot arm to the "Home" position
-//-------------------------------------------------------------------------------
-void Home(void){
-  ShoulderLift(SHOULDER_LIFT_HOME);
-  Elbow(ELBOW_HOME);
-  Wrist(WRIST_HOME);
-  Gripper(GRIPPER_HOME);
-  ShoulderRot(SHOULDER_ROT_HOME);
-}
-
-//-------------------------------------------------------------------------------
-// MotorStop()
-//
-// Sets all digital output pins to LOW
-//-------------------------------------------------------------------------------
-
+// void Rest(void){
+//   ShoulderRot(SHOULDER_ROT_HOME);
+//   Elbow((ELBOW_DOWN + ELBOW_UP) / 2);
+//   ShoulderLift(SHOULDER_UP);
+//   Elbow(ELBOW_DOWN);
+//   Wrist(WRIST_DOWN);
+//   Gripper(GRIPPER_CLOSED);
+// }
