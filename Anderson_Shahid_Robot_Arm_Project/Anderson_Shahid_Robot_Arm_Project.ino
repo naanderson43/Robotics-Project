@@ -24,7 +24,7 @@ struct Motor{
   int _enable; 
   int _pot;
   int _tol; //tolerance 
-}
+};
 
 enum MotorName{
   GRIPPER, 
@@ -32,7 +32,7 @@ enum MotorName{
   ELBOW, 
   SHOULDER_LIFT, 
   SHOULDER_ROT
-}
+};
 
 struct Motor motors[MOTOR_NUM]; 
 
@@ -49,12 +49,12 @@ void MotorSetup(){
   motors[SHOULDER_ROT]._tol = 5;
 }
 
-void Motor(int motor, int speed, int direction){
+void motor_write(int motor, int speed, int direction){
   digitalWrite(motors[motor]._pin, direction); 
   analogWrite(motors[motor]._enable, speed); 
 }
 
-void MotorStop(){
+void motor_stop(){
   for(int i = 0; i < MOTOR_NUM ; i++){
     analogWrite(motors[i]._enable, 0); 
     digitalWrite(motors[i]._pin, LOW); 
@@ -64,16 +64,16 @@ void MotorStop(){
 void MotorControl(int motor, int position, int speed){
     while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol) || analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
     if(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){
-      Motor(motor, enable, speed, HIGH); 
+      motor_write(motor, speed, HIGH); 
       while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){}
-      MotorStop();
+      motor_stop();
       delay(700);
     }
 
     if(analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
-      Motor(motor, enable, speed, LOW); 
+      motor_write(motor, speed, LOW); 
       while(analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){}
-      MotorStop();
+      motor_stop();
       delay(700);
     }
   }
@@ -82,7 +82,7 @@ void MotorControl(int motor, int position, int speed){
 struct motor_state{
   int position[5];
   int speed[5]; 
-}
+};
 
 struct motor_state move_forward[3]; 
 void move_forward_setup(){
@@ -120,13 +120,13 @@ void move_forward_setup(){
 struct motor_state home; 
 void home_setup(void){
   for (int i = 0 ; i < MOTOR_NUM ; i++){
-    home[i].speed[DEFAULT_SPEED]; 
+    home.speed[i] = DEFAULT_SPEED; 
   }
-  home[GRIPPER].position[GRIPPER_CLOSED]; 
-  home[ELBOW].position[350]; 
-  home[WRIST].position[500];
-  home[SHOULDER_LIFT].position[500]; 
-  home[SHOULDER_ROT].position[500]; 
+  home.position[GRIPPER] = GRIPPER_CLOSED; 
+  home.position[ELBOW] = 350; 
+  home.position[WRIST] = 500; 
+  home.position[SHOULDER_LIFT] = 500; 
+  home.position[SHOULDER_ROT] = 500; 
 // rest positions 
 //   ShoulderRot(SHOULDER_ROT_HOME);
 //   Elbow((ELBOW_DOWN + ELBOW_UP) / 2);
@@ -153,14 +153,14 @@ void setup() {
     pinMode(motors[i]._enable, OUTPUT); 
     pinMode(motors[i]._pin, OUTPUT);  
   }
-  MotorStop(); 
+  motor_stop(); 
 }
 
 void loop() {
-  MotorControl(GRIPPER, home[GRIPPER].position, home[GRIPPER].speed);
-  MotorControl(WRIST, home[WRIST].position, home[WRIST].speed); 
-  MotorControl(ELBOW, home[ELBOW].position, home[ELBOW].speed); 
-  MotorControl(SHOULDER_LIFT, home[SHOULDER_LIFT].position, home[SHOULDER_LIFT].speed); 
-  MotorControl(SHOULDER_ROT, home[SHOULDER_ROT].position, home[SHOULDER_ROT].speed); 
+  MotorControl(GRIPPER, home.position[GRIPPER], home.speed[GRIPPER]);
+  MotorControl(WRIST, home.position[WRIST], home.speed[WRIST]); 
+  MotorControl(ELBOW, home.position[ELBOW], home.speed[ELBOW]); 
+  MotorControl(SHOULDER_LIFT, home.position[SHOULDER_LIFT], home.speed[SHOULDER_LIFT]); 
+  MotorControl(SHOULDER_ROT, home.position[SHOULDER_ROT], home.speed[SHOULDER_ROT]); 
   while(1);
 }
