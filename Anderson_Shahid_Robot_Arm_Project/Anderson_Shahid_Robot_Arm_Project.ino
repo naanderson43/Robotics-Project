@@ -4,40 +4,6 @@
  *  Authors: Nick Anderson & Sikender Shahid
  *  Course Instructor: Dr. Aaron Becker
  */
-//-------------------------------------------------------------------------------
-// Globals
-//-------------------------------------------------------------------------------
-
-// Motor enable pins
-int enGripper = 8;       //Enable gripper motor
-int enWrist = 9;         //Enable wrist motor
-int enElbow = 10;        //Enable elbow motor
-int enShoulderLift = 11; //Enable shoulder lift motor
-int enShoulderRot = 12;  //Enable shoulder rotation motor
-int enLight =13; 
-  
-// Motor control pins
-int gripper = 2;        //Gripper close Pin
-int wrist = 3;          //Wrist up pin
-int elbow = 4;          //Elbow up pin
-int shoulderLift = 5;   //Shoulder down pin
-int shoulderRot = 6;    //Shoulder right pin
-int light = 7;
-
-// Potentiometer analog input pins
-int gripperPot = 0;
-int wristPot = 1;
-int elbowPot = 2;
-int shLiftPot = 3;
-int shRotPot = 4;
-
-//-------------------------------------------------------------------------------
-// Defines
-//-------------------------------------------------------------------------------
-// PWM for ENABLE WRITE
-int PWM_ENABLE_ON = 100;
-#define PWM_ENABLE_OFF 0
-
 // Pot value limits
 #define GRIPPER_OPEN 460
 #define GRIPPER_CLOSED 677
@@ -57,39 +23,6 @@ int PWM_ENABLE_ON = 100;
 #define WRIST_HOME 500
 #define GRIPPER_HOME 460
 
-// Position tolerances
-#define GRIPPER_TOL 50
-#define WRIST_TOL 40
-#define ELBOW_TOL 20
-#define SH_LIFT_TOL 20
-#define SH_ROT_TOL 5
-
-//-------------------------------------------------------------------------------
-// Prototypes
-//-------------------------------------------------------------------------------
-void Gripper(int t);
-void Wrist(int t);
-void Elbow(int t);
-void ShoulderLift(int t);
-void ShoulderRot(int t);
-void Rest(void);
-void Home(void);
-void MotorStop(); 
-
-
-/*
-turning arm pressure down 
-picking up the base
-rotating the base <Camera>
-*/
-
-/*
-moving forward
-*/
-
-/*
-moving backward
-*/
 #define MOTOR_NUM 5
 
 struct Motor{
@@ -99,7 +32,15 @@ struct Motor{
   int _tol; //tolerance 
 }
 
-Motor motors[MOTOR_NUM]; 
+enum MotorName{
+  GRIPPER, 
+  WRIST, 
+  ELBOW, 
+  SHOULDER_LIFT, 
+  SHOULDER_ROT
+}
+
+struct Motor motors[MOTOR_NUM]; 
 
 void MotorSetup(){
   for(int i = 0 ; i < MOTOR_NUM ; i++){
@@ -107,11 +48,11 @@ void MotorSetup(){
     motors[i]._enable = 8 + i; 
     motors[i]._pot = i; 
   }
-  motors[0]._tol = 50; 
-  motors[1]._tol = 40; 
-  motors[2]._tol = 20; 
-  motors[3]._tol = 20; 
-  motors[4]._tol = 5;
+  motors[GRIPPER]._tol = 50; 
+  motors[WRIST]._tol = 40; 
+  motors[ELBOW]._tol = 20; 
+  motors[SHOULDER_LIFT]._tol = 20; 
+  motors[SHOULDER_ROT]._tol = 5;
 }
 
 void Motor(int motor, int speed, int direction){
@@ -162,6 +103,18 @@ void setup() {
 //
 // Runs control program
 //-------------------------------------------------------------------------------
+// struct motor_state{
+//   int *motor; 
+//   int *position;
+// }
+// struct motor_state* move_forward; 
+// void move_forward_setup(){
+//   struct motor_state * move_forward= (struct motor_s*) 3; 
+//   move_forward[0]->motor = (int*)malloc((5)*sizeof(int)); 
+//   move_forward[0]->position = (int*)malloc((5)*sizeof(int)); 
+// }
+
+
 void loop() {
  while(1){ 
   //init state
@@ -234,137 +187,6 @@ void loop() {
   // End program
   while(true){}
 }
-
-//-------------------------------------------------------------------------------
-// Gripper()
-//
-// Adjusts gripper opening to within the defined
-// tolerance of the desired setting
-//-------------------------------------------------------------------------------
-void Gripper(int t){
-  while(analogRead(gripperPot) > (t + GRIPPER_TOL) || analogRead(gripperPot) < (t - GRIPPER_TOL)){
-    if(analogRead(gripperPot) > (t + GRIPPER_TOL)){
-      digitalWrite(gripper, HIGH);
-      analogWrite(enGripper, PWM_ENABLE_ON);
-      while(analogRead(gripperPot) > (t + GRIPPER_TOL)){}
-      analogWrite(enGripper, PWM_ENABLE_OFF);
-      delay(700);
-    }
-    
-    if(analogRead(gripperPot) < (t - GRIPPER_TOL)){
-      digitalWrite(gripper, LOW);
-      analogWrite(enGripper, PWM_ENABLE_ON);
-      while(analogRead(gripperPot) < (t - GRIPPER_TOL)){}
-      analogWrite(enGripper, PWM_ENABLE_OFF);
-      delay(700);
-    }
-  }
-}
-
-//-------------------------------------------------------------------------------
-// Wrist()
-//
-// Adjusts wrist angle to within the defined
-// tolerance of the desired setting
-//-------------------------------------------------------------------------------
-void Wrist(int t){
-  while(analogRead(wristPot) < (t - WRIST_TOL) || analogRead(wristPot) > (t + WRIST_TOL)){
-    if(analogRead(wristPot) < (t - WRIST_TOL)){
-      digitalWrite(wrist, HIGH);
-      analogWrite(enWrist, PWM_ENABLE_ON);
-      while(analogRead(wristPot) < (t - WRIST_TOL)){}
-      analogWrite(enWrist, PWM_ENABLE_OFF);
-      delay(700);
-    }  
-    
-    if(analogRead(wristPot) > (t + WRIST_TOL)){
-      digitalWrite(wrist, LOW);
-      analogWrite(enWrist, PWM_ENABLE_ON);
-      while(analogRead(wristPot) > (t + WRIST_TOL)){}
-      analogWrite(enWrist, PWM_ENABLE_OFF);
-      delay(700);
-    }
-  }  
-}
-
-//-------------------------------------------------------------------------------
-// Elbow()
-//
-// Adjusts elbow angle to within the defined
-// tolerance of the desired setting
-//-------------------------------------------------------------------------------
-void Elbow(int t){
-  while(analogRead(elbowPot) < (t - ELBOW_TOL) || analogRead(elbowPot) > (t + ELBOW_TOL)){
-    if(analogRead(elbowPot) < (t - ELBOW_TOL)){
-      digitalWrite(elbow, HIGH);
-      analogWrite(enElbow, PWM_ENABLE_ON);
-      while(analogRead(elbowPot) < (t - ELBOW_TOL)){}
-      analogWrite(enElbow, PWM_ENABLE_OFF);
-      delay(700);
-    }
-
-    if(analogRead(elbowPot) > (t + ELBOW_TOL)){
-      digitalWrite(elbow, LOW);
-      analogWrite(enElbow, PWM_ENABLE_ON);
-      while(analogRead(elbowPot) > (t + ELBOW_TOL)){}
-      analogWrite(enElbow, PWM_ENABLE_OFF);
-      delay(700);
-    }
-  }
-}
-
-//-------------------------------------------------------------------------------
-// ShoulderLift()
-//
-// Adjusts shoulder lift angle to within the defined
-// tolerance of the desired setting
-//-------------------------------------------------------------------------------
-void ShoulderLift(int t){
-  while(analogRead(shLiftPot) > (t + SH_LIFT_TOL) || analogRead(shLiftPot) < (t - SH_LIFT_TOL)){
-    if(analogRead(shLiftPot) > (t + SH_LIFT_TOL)){
-      digitalWrite(shoulderLift, HIGH);
-      analogWrite(enShoulderLift, PWM_ENABLE_ON);
-      while(analogRead(shLiftPot) > (t + SH_LIFT_TOL)){}
-      analogWrite(enShoulderLift, PWM_ENABLE_OFF);
-      delay(700);
-    }
-
-    if(analogRead(shLiftPot) < (t - SH_LIFT_TOL)){
-      digitalWrite(shoulderLift, LOW);
-      analogWrite(enShoulderLift, PWM_ENABLE_ON);
-      while(analogRead(shLiftPot) < (t - SH_LIFT_TOL)){}
-      analogWrite(enShoulderLift, PWM_ENABLE_OFF);
-      delay(700);
-    }
-  }
-}
-
-//-------------------------------------------------------------------------------
-// ShoulderRot()
-//
-// Adjusts shoulder rotation angle to within the defined
-// tolerance of the desired setting
-//-------------------------------------------------------------------------------
-void ShoulderRot(int t){
-  while(analogRead(shRotPot) < (t - SH_ROT_TOL) || analogRead(shRotPot) > (t + SH_ROT_TOL)){
-    if(analogRead(shRotPot) < (t - SH_ROT_TOL)){
-      digitalWrite(shoulderRot, HIGH);
-      analogWrite(enShoulderRot, PWM_ENABLE_ON);
-      while(analogRead(shRotPot) < (t - SH_ROT_TOL)){}
-      analogWrite(enShoulderRot, PWM_ENABLE_OFF);
-      delay(700);
-    }
-
-    if(analogRead(shRotPot) > (t + SH_ROT_TOL)){
-      digitalWrite(shoulderRot, LOW);
-      analogWrite(enShoulderRot, PWM_ENABLE_ON);
-      while(analogRead(shRotPot) > (t + SH_ROT_TOL)){}
-      analogWrite(enShoulderRot, PWM_ENABLE_OFF);
-      delay(700);
-    }
-  }
-}
-
 //-------------------------------------------------------------------------------
 // Rest()
 //
