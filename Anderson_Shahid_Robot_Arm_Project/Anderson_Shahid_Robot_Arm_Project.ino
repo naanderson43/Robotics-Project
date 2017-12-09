@@ -16,13 +16,6 @@
 #define SHOULDER_LEFT 150
 #define SHOULDER_RIGHT 925
 
-// Home position pot values
-#define SHOULDER_ROT_HOME 500
-#define SHOULDER_LIFT_HOME 500
-#define ELBOW_HOME 350
-#define WRIST_HOME 500
-#define GRIPPER_HOME 460
-
 #define MOTOR_NUM 5
 #define DEFAULT_SPEED 100
 
@@ -68,7 +61,7 @@ void MotorStop(){
   }
 }
 
-void MotorControl(int motor, int speed, int position){
+void MotorControl(int motor, int position, int speed){
     while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol) || analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
     if(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){
       Motor(motor, enable, speed, HIGH); 
@@ -130,10 +123,24 @@ void home_setup(void){
     home[i].speed[DEFAULT_SPEED]; 
   }
   home[GRIPPER].position[GRIPPER_CLOSED]; 
-  home[ELBOW].position[ELBOW_HOME]; 
-  home[WRIST].position[WRIST_HOME];
-  home[SHOULDER_LIFT].position[SHOULDER_LIFT_HOME]; 
-  home[SHOULDER_ROT].position[SHOULDER_ROT_HOME]; 
+  home[ELBOW].position[350]; 
+  home[WRIST].position[500];
+  home[SHOULDER_LIFT].position[500]; 
+  home[SHOULDER_ROT].position[500]; 
+// rest positions 
+//   ShoulderRot(SHOULDER_ROT_HOME);
+//   Elbow((ELBOW_DOWN + ELBOW_UP) / 2);
+//   ShoulderLift(SHOULDER_UP);
+//   Elbow(ELBOW_DOWN);
+//   Wrist(WRIST_DOWN);
+//   Gripper(GRIPPER_CLOSED);
+
+//   // Home position pot values
+// #define SHOULDER_ROT_HOME 500
+// #define SHOULDER_LIFT_HOME 500
+// #define ELBOW_HOME 350
+// #define WRIST_HOME 500
+// #define GRIPPER_HOME 460
 }
 
 //-------------------------------------------------------------------------------
@@ -150,18 +157,10 @@ void setup() {
 }
 
 void loop() {
+  MotorControl(GRIPPER, home[GRIPPER].position, home[GRIPPER].speed);
+  MotorControl(WRIST, home[WRIST].position, home[WRIST].speed); 
+  MotorControl(ELBOW, home[ELBOW].position, home[ELBOW].speed); 
+  MotorControl(SHOULDER_LIFT, home[SHOULDER_LIFT].position, home[SHOULDER_LIFT].speed); 
+  MotorControl(SHOULDER_ROT, home[SHOULDER_ROT].position, home[SHOULDER_ROT].speed); 
   while(1);
 }
-//-------------------------------------------------------------------------------
-// Rest()
-//
-// Moves robot arm to the "rest" position
-//-------------------------------------------------------------------------------
-// void Rest(void){
-//   ShoulderRot(SHOULDER_ROT_HOME);
-//   Elbow((ELBOW_DOWN + ELBOW_UP) / 2);
-//   ShoulderLift(SHOULDER_UP);
-//   Elbow(ELBOW_DOWN);
-//   Wrist(WRIST_DOWN);
-//   Gripper(GRIPPER_CLOSED);
-// }
