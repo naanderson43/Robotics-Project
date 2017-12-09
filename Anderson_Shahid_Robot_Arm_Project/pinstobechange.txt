@@ -1,0 +1,25 @@
+gripper open to closed
+460 667
+high
+
+wrist up to down 
+960 125
+low
+change pin
+
+elbow up to down
+1000 130
+low
+changepin
+
+shoulder up to down 
+325 925
+high
+
+
+shoulder left to right
+150 925
+low
+changepin
+
+

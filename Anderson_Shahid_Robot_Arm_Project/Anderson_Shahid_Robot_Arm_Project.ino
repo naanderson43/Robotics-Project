@@ -74,7 +74,7 @@ void ShoulderLift(int t);
 void ShoulderRot(int t);
 void Rest(void);
 void Home(void);
-void StopMotor(); 
+void MotorStop(); 
 
 
 /*
@@ -90,31 +90,59 @@ moving forward
 /*
 moving backward
 */
+#define MOTOR_NUM 5
 
-
-void Motor(int motor, int enable, int speed, int direction){
-  digitalWrite(motor, direction); 
-  analogWrite(enable, speed); 
+struct Motor{
+  int _pin; 
+  int _enable; 
+  int _pot;
+  int _tol; //tolerance 
 }
 
-void MotorControl(int motor, int enable, int speed, int pot, int position, int tolerance){
-    while(analogRead(pot) < (position - tolerance) || analogRead(pot) > (position + tolerance)){
-    if(analogRead(pot) < (position - tolerance)){
+Motor motors[MOTOR_NUM]; 
+
+void MotorSetup(){
+  for(int i = 0 ; i < MOTOR_NUM ; i++){
+    motors[i]._pin = 2 + i; 
+    motors[i]._enable = 8 + i; 
+    motors[i]._pot = i; 
+  }
+  motors[0]._tol = 50; 
+  motors[1]._tol = 40; 
+  motors[2]._tol = 20; 
+  motors[3]._tol = 20; 
+  motors[4]._tol = 5;
+}
+
+void Motor(int motor, int speed, int direction){
+  digitalWrite(motors[motor]._pin, direction); 
+  analogWrite(motors[motor]._enable, speed); 
+}
+
+void MotorStop(){
+  for(int i = 0; i < MOTOR_NUM ; i++){
+    analogWrite(motors[i]._enable, 0); 
+    digitalWrite(motors[i]._pin, LOW); 
+  }
+}
+
+void MotorControl(int motor, int speed, int position){
+    while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol) || analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
+    if(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){
       Motor(motor, enable, speed, HIGH); 
-      while(analogRead(pot) < (position - tolerance)){}
-      analogWrite(enable, 0);
+      while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){}
+      MotorStop();
       delay(700);
     }
 
-    if(analogRead(motor) > (position + tolerance)){
+    if(analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
       Motor(motor, enable, speed, LOW); 
-      while(analogRead(pot) > (position + tolerance)){}
-      analogWrite(enable, 0);
+      while(analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){}
+      MotorStop();
       delay(700);
     }
   }
 }
-
 
 //-------------------------------------------------------------------------------
 // setup()
@@ -122,22 +150,11 @@ void MotorControl(int motor, int enable, int speed, int pot, int position, int t
 // Configures digital pins and clears outputs
 //-------------------------------------------------------------------------------
 void setup() {
-  // Set enable pins as outputs
-  pinMode(enShoulderLift, OUTPUT);
-  pinMode(enElbow, OUTPUT);
-  pinMode(enWrist, OUTPUT);
-  pinMode(enGripper, OUTPUT);
-  pinMode(enShoulderRot, OUTPUT);
-
-  // Set motor pins as outputs
-  pinMode(shoulderLift, OUTPUT);
-  pinMode(elbow, OUTPUT);
-  pinMode(wrist, OUTPUT);
-  pinMode(gripper, OUTPUT);
-  pinMode(shoulderRot, OUTPUT);
-
-  // Set all outputs low
-  StopMotor();
+  for(int i = 0 ; i < MOTOR_NUM ; i++){
+    pinMode(motors[i]._enable, OUTPUT); 
+    pinMode(motors[i]._pin, OUTPUT);  
+  }
+  MotorStop(); 
 }
 
 //-------------------------------------------------------------------------------
@@ -376,19 +393,8 @@ void Home(void){
 }
 
 //-------------------------------------------------------------------------------
-// StopMotor()
+// MotorStop()
 //
 // Sets all digital output pins to LOW
 //-------------------------------------------------------------------------------
-void StopMotor(){
-  analogWrite(enShoulderLift, PWM_ENABLE_OFF);
-  analogWrite(enElbow, PWM_ENABLE_OFF);
-  analogWrite(enWrist, PWM_ENABLE_OFF);
-  analogWrite(enGripper, PWM_ENABLE_OFF);
-  analogWrite(enShoulderRot, PWM_ENABLE_OFF);
-  digitalWrite(shoulderLift, LOW);
-  digitalWrite(elbow, LOW);
-  digitalWrite(wrist, LOW);
-  digitalWrite(gripper, LOW);
-  digitalWrite(shoulderRot, LOW);
-}
+
