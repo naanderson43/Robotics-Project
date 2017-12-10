@@ -47,11 +47,10 @@ void MotorSetup(){
   motors[ELBOW]._tol = 20; 
   motors[SHOULDER_LIFT]._tol = 20; 
   motors[SHOULDER_ROT]._tol = 5;
-}
-
-void motor_write(int motor, int speed, int direction){
-  digitalWrite(motors[motor]._pin, direction); 
-  analogWrite(motors[motor]._enable, speed); 
+  for(int i = 0 ; i < MOTOR_NUM ; i++){
+    pinMode(motors[i]._enable, OUTPUT); 
+    pinMode(motors[i]._pin, OUTPUT);  
+  }
 }
 
 void motor_stop(){
@@ -63,17 +62,21 @@ void motor_stop(){
 
 void MotorControl(int motor, int position, int speed){
     while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol) || analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
-    if(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){
-      motor_write(motor, speed, HIGH); 
+    if(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){ 
+      digitalWrite(motors[motor]._pin, HIGH); 
+      analogWrite(motors[motor]._enable, speed);
       while(analogRead(motors[motor]._pot) < (position - motors[motor]._tol)){}
-      motor_stop();
+      analogWrite(motors[motor]._enable, 0); 
+   //   motor_stop();
       delay(700);
     }
 
     if(analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){
-      motor_write(motor, speed, LOW); 
+      digitalWrite(motors[motor]._pin, LOW); 
+      analogWrite(motors[motor]._enable, speed);
       while(analogRead(motors[motor]._pot) > (position + motors[motor]._tol)){}
-      motor_stop();
+      analogWrite(motors[motor]._enable, 0); 
+   //   motor_stop();
       delay(700);
     }
   }
@@ -122,7 +125,7 @@ void home_setup(void){
   for (int i = 0 ; i < MOTOR_NUM ; i++){
     home.speed[i] = DEFAULT_SPEED; 
   }
-  home.position[GRIPPER] = GRIPPER_CLOSED; 
+  home.position[GRIPPER] = (GRIPPER_CLOSED - (GRIPPER_CLOSED-GRIPPER_OPEN)/2); 
   home.position[ELBOW] = 350; 
   home.position[WRIST] = 500; 
   home.position[SHOULDER_LIFT] = 500; 
@@ -150,14 +153,17 @@ void home_setup(void){
 //-------------------------------------------------------------------------------
 void setup() {
   MotorSetup(); 
-  for(int i = 0 ; i < MOTOR_NUM ; i++){
-    pinMode(motors[i]._enable, OUTPUT); 
-    pinMode(motors[i]._pin, OUTPUT);  
-  }
-  motor_stop(); 
+  motor_stop();
+  home_setup();  
 }
 
 void loop() {
+
+ // MotorControl(WRIST, 500, home.speed[WRIST]); 
+   MotorControl(3, SHOULDER_DOWN, 200);
+  while(1);  
+  MotorControl(ELBOW, (ELBOW_DOWN + ELBOW_UP) / 2, 100); 
+  while(1); 
   MotorControl(GRIPPER, home.position[GRIPPER], home.speed[GRIPPER]);
   MotorControl(WRIST, home.position[WRIST], home.speed[WRIST]); 
   MotorControl(ELBOW, home.position[ELBOW], home.speed[ELBOW]); 
